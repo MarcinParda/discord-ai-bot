@@ -1,19 +1,16 @@
-import OpenAI from 'openai';
+import Groq from 'groq-sdk';
+import { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions.mjs';
 import dotenv from 'dotenv';
-import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 
 dotenv.config();
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-export const generateOpenAIResponse = async (
+export const generateGroqResponse = async (
   prompt: string,
-  conversation: ChatCompletionMessageParam[]
+  conversation: Array<ChatCompletionMessageParam>
 ): Promise<string> => {
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+  const completion = await groq.chat.completions.create({
+    model: 'llama3-8b-8192',
     messages: [
       { role: 'system', content: 'You are a helpful Discord assistant' },
       ...conversation,

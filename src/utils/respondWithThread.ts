@@ -1,8 +1,8 @@
 import { Client, Message, OmitPartialGroupDMChannel } from 'discord.js';
-import { generateResponse } from '../openai';
+import { generateGroqResponse } from '../groq';
 
 const threadNameGeneratorPrompt = (userPrompt: string) => {
-  return `Create a thread name based on the prompt. It should be one sentence long summary, max 10 words. 
+  return `Create a thread name based on the prompt. As shorter as better, but it should help me navigate between multiple threads. Don't user markdown here, respond with plain text.
   <prompt>
     ${userPrompt}
   </prompt>`;
@@ -17,8 +17,8 @@ export async function respondWithThread(
 
     const prompt = message.content.replace(`<@${client.user?.id}>`, '').trim();
     const [response, threadName] = await Promise.all([
-      generateResponse(prompt, []),
-      generateResponse(threadNameGeneratorPrompt(prompt), []),
+      generateGroqResponse(prompt, []),
+      generateGroqResponse(threadNameGeneratorPrompt(prompt), []),
     ]);
 
     const thread = await message.startThread({
