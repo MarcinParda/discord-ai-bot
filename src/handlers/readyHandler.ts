@@ -1,4 +1,4 @@
-import { REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { REST, Routes } from 'discord.js';
 import { ClientWithUser } from '../types/ClientWithUser';
 import { commands } from '../commands';
 
