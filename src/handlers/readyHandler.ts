@@ -1,15 +1,9 @@
 import { REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { ClientWithUser } from '../types/ClientWithUser';
+import { commands } from '../commands';
 
 export const handleReady = async (client: ClientWithUser) => {
   console.log(`Logged in as ${client.user.tag}!`);
-
-  const commands = [
-    new SlashCommandBuilder()
-      .setName('clearall')
-      .setDescription('Clears all messages in the channel'),
-  ].map((command) => command.toJSON());
-
   const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN!);
 
   try {
