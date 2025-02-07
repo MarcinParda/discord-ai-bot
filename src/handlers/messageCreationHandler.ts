@@ -4,13 +4,8 @@ import { respondWithThread } from '../utils/respondWithThread';
 import { respondInThread } from '../utils/respondInThread';
 import { generateGroqResponse } from '../groq';
 import { getFeedUrlsFromNotion } from '../notion';
-
-const categorizationPrompt = (prompt: string) =>
-  `You are a categorizer assistant. 
-Please categorize following prompt in one of two categories: GET_FEEDS_URL or OTHER. 
-As a response return only one of these two categories name. 
-No interpunction, no comments, no thought process. 
-<prompt>${prompt}</prompt>`;
+import { getPromptCategoryPrompt } from '../prompts/getCategoryPrompts';
+import { PromptCategory } from '../types/Prompts';
 
 export const handleMessageCreate = async (
   client: ClientWithUser,
@@ -19,29 +14,32 @@ export const handleMessageCreate = async (
   if (message.author.bot) {
     return;
   }
+  // Add guard check for generateGroqResponse
+  const promptCategory = (await generateGroqResponse(
+    getPromptCategoryPrompt(message.content),
+    []
+  )) as PromptCategory;
 
   if (message.mentions.has(client.user)) {
-    const queryType = await generateGroqResponse(
-      categorizationPrompt(message.content),
-      []
-    );
-    console.log('Getting feeds', queryType);
-
-    if (queryType === 'GET_FEEDS_URL') {
-      const feeds = await getFeedUrlsFromNotion();
-      const feedsUrl = feeds
-        .map((feed) => `${feed.title}: ${feed.url}`)
-        .join('\n');
-      await message.reply(feedsUrl);
-    } else {
-      await respondWithThread(message, client);
+    switch (promptCategory) {
+      case 'GET_FEEDS_URL':
+        const feeds = await getFeedUrlsFromNotion();
+        const feedsUrl = feeds
+          .map((feed) => `${feed.title}: ${feed.url}`)
+          .join('\n');
+        await message.reply(feedsUrl);
+        return;
+      default:
+        await respondWithThread(message, client);
+        return;
     }
+  }
 
-    if (
-      message.channel.isThread() &&
-      message.channel.ownerId === client.user.id
-    ) {
-      await respondInThread(message, client);
-    }
+  if (
+    message.channel.isThread() &&
+    message.channel.ownerId === client.user.id
+  ) {
+    await respondInThread(message, client);
+    return;
   }
 };

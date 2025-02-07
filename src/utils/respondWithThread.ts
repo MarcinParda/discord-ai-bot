@@ -1,12 +1,6 @@
 import { Client, Message, OmitPartialGroupDMChannel } from 'discord.js';
 import { generateGroqResponse } from '../groq';
-
-const threadNameGeneratorPrompt = (userPrompt: string) => {
-  return `Create a thread name based on the prompt. As shorter as better, but it should help me navigate between multiple threads. Don't user markdown here, respond with plain text.
-  <prompt>
-    ${userPrompt}
-  </prompt>`;
-};
+import { threadNameGeneratorPrompt } from '../prompts/threadNameGeneratorPrompt';
 
 export async function respondWithThread(
   message: OmitPartialGroupDMChannel<Message<boolean>>,
